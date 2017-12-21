@@ -1,6 +1,7 @@
 package com.tongji.testserver.domain;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import springfox.documentation.spring.web.json.Json;
 
 import javax.persistence.*;
@@ -9,6 +10,7 @@ import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @program: testserver
@@ -28,7 +30,7 @@ public class Path extends Entitys implements Serializable {
     @Column(nullable = true)
     private String recommendTime;
     @Column(nullable = true)
-    private Timestamp preferLeaveTime;
+    private Long preferLeaveTime;
     @OneToMany(mappedBy = "path")
     private List<Destination> destinations;
     @Column(nullable = true)
@@ -47,12 +49,28 @@ public class Path extends Entitys implements Serializable {
     @JsonBackReference
     private User user;
     @OneToMany(mappedBy = "path")
+    @JsonManagedReference
     private List<MapPattern> mapPatterns;
     @OneToOne(mappedBy = "path")
     private Notice notice;
     @ManyToOne
     @JsonBackReference
     private PathFavorites pathFavorites;
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Path path = (Path) o;
+        return id == path.id;
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(id);
+    }
 
     public static long getSerialVersionUID() {
         return serialVersionUID;
@@ -82,11 +100,11 @@ public class Path extends Entitys implements Serializable {
         this.recommendTime = recommendTime;
     }
 
-    public Timestamp getPreferLeaveTime() {
+    public Long getPreferLeaveTime() {
         return preferLeaveTime;
     }
 
-    public void setPreferLeaveTime(Timestamp preferLeaveTime) {
+    public void setPreferLeaveTime(Long preferLeaveTime) {
         this.preferLeaveTime = preferLeaveTime;
     }
 

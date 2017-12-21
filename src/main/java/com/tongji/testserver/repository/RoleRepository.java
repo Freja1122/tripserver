@@ -1,4 +1,7 @@
 package com.tongji.testserver.repository;
 
-public interface RoleRepository {
+import com.tongji.testserver.domain.Role;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface RoleRepository  extends JpaRepository<Role, Long> {
 }

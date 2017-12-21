@@ -3,9 +3,11 @@ package com.tongji.testserver.domain;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.tongji.testserver.domain.enums.CollectType;
 import com.tongji.testserver.domain.enums.FavoritesType;
+import com.tongji.testserver.utils.DateUtils;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * 收藏夹
@@ -19,7 +21,7 @@ public class Favorites extends Entitys implements Serializable {
 	@Id
 	@GeneratedValue
 	private long id;
-	@Column(nullable = false)
+	@Column(nullable = true)
 	private String name;
 	@Column(nullable = false)
 	private Long count;
@@ -35,6 +37,12 @@ public class Favorites extends Entitys implements Serializable {
 	@ManyToOne
 	@JsonBackReference
 	private User user;
+
+	public Favorites() {
+		count = new Long(0);
+		createTime= DateUtils.getCurrentTime();
+		lastModifyTime = DateUtils.getCurrentTime();
+	}
 
 	public static long getSerialVersionUID() {
 		return serialVersionUID;

@@ -1,4 +1,7 @@
 package com.tongji.testserver.repository;
 
-public interface LoadHotFavoritesRepository {
+import com.tongji.testserver.domain.LoadHotFavorites;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface LoadHotFavoritesRepository extends JpaRepository<LoadHotFavorites, Long> {
 }

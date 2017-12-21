@@ -35,7 +35,7 @@ public class PathController extends BaseController {
     @Autowired
     private DestinationRepository destinationRepository;
 
-    @RequestMapping(value = "", method = RequestMethod.POST)
+    @RequestMapping(value = "", method = RequestMethod.PUT)
     @LoggerManage(description = "增加新的路径")
     public ResponseData create(){
         try {
@@ -43,7 +43,8 @@ public class PathController extends BaseController {
             Path path = new Path();
             path.setCreateTime(DateUtils.getCurrentTime());
             User loginUser = getUser();
-            path.setUser(loginUser);
+            loginUser.addPath(path);
+//            path.setUser(loginUser);
             pathRepository.save(path);
             return new ResponseData(ExceptionMsg.SUCCESS, path);
         }catch (Exception e){
@@ -116,10 +117,10 @@ public class PathController extends BaseController {
 
     @RequestMapping(value = "/preferLeaveTime", method = RequestMethod.POST)
     @LoggerManage(description = "设置偏好出行时间")
-    public ResponseData setPreferTime(long pathId, String preferLeaveTime){
+    public ResponseData setPreferTime(long pathId, Long preferLeaveTime){
         try {
             Path path = pathRepository.findById(pathId);
-            path.setPreferLeaveTime(Timestamp.valueOf(preferLeaveTime));
+            path.setPreferLeaveTime(preferLeaveTime);
             return new ResponseData(ExceptionMsg.SUCCESS, path);
         }catch (Exception e){
             logger.error("failed", e);
@@ -186,7 +187,7 @@ public class PathController extends BaseController {
     }
 
     @RequestMapping(value = "/type", method = RequestMethod.POST)
-    @LoggerManage(description = "设置描述")
+    @LoggerManage(description = "设置类型")
     public ResponseData setType(long pathId, String type){
         try {
             Path path = pathRepository.findById(pathId);

@@ -1,4 +1,8 @@
 package com.tongji.testserver.repository;
 
-public interface PsgHotNodeRepository {
+import com.tongji.testserver.domain.PsgHotNode;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface PsgHotNodeRepository extends JpaRepository<PsgHotNode, Long> {
+    PsgHotNode findById(long id);
 }

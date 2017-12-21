@@ -1,11 +1,13 @@
 package com.tongji.testserver.controller;
 import com.tongji.testserver.comm.Const;
 import com.tongji.testserver.comm.aop.LoggerManage;
-import com.tongji.testserver.domain.User;
+import com.tongji.testserver.domain.*;
 import com.tongji.testserver.domain.result.ExceptionMsg;
 import com.tongji.testserver.domain.result.Response;
 import com.tongji.testserver.domain.result.ResponseData;
+import com.tongji.testserver.repository.PathRepository;
 import com.tongji.testserver.repository.UserRepository;
+import com.tongji.testserver.service.HotNodeService;
 import com.tongji.testserver.utils.DateUtils;
 import com.tongji.testserver.utils.FileUtil;
 import com.tongji.testserver.utils.MD5Util;
@@ -38,6 +40,8 @@ import java.util.UUID;
 public class UserController extends BaseController{
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private PathRepository pathRepository;
     @Resource
     private JavaMailSender mailSender;
     @Value("${spring.mail.username}")
@@ -67,12 +71,12 @@ public class UserController extends BaseController{
             }else if(!loginUser.getPassWord().equals(getPwd(user.getPassWord()))){
                 return new ResponseData(ExceptionMsg.LoginNameOrPassWordError);
             }
-//            //创建cookie保存登录用户信息
-//            //设置cookie寿命30天
-//            Cookie cookie = new Cookie(Const.LOGIN_SESSION_KEY, cookieSign(loginUser.getId().toString()));
-//            cookie.setMaxAge(Const.COOKIE_TIMEOUT);
-//            cookie.setPath("/");
-//            response.addCookie(cookie);
+            //创建cookie保存登录用户信息
+            //设置cookie寿命30天
+            Cookie cookie = new Cookie(Const.LOGIN_SESSION_KEY, cookieSign(loginUser.getId().toString()));
+            cookie.setMaxAge(Const.COOKIE_TIMEOUT);
+            cookie.setPath("/");
+            response.addCookie(cookie);
             getSession().setAttribute(Const.LOGIN_SESSION_KEY, loginUser);
             //获取登录前的界面
             String preUrl = "/";
@@ -108,6 +112,13 @@ public class UserController extends BaseController{
             user.setCreateTime(DateUtils.getCurrentTime());
             user.setLastModifyTime(DateUtils.getCurrentTime());
             user.setProfilePicture("img/favicon.png");
+
+//            //创建四个默认收藏夹
+//            user.setDestinationFavorites(new DestinationFavorites());
+//            user.setPathFavorites(new PathFavorites());
+//            user.setLoadHotFavorites(new LoadHotFavorites());
+//            user.setPsgHotFavorites(new PsgHotFavorites());
+
             userRepository.save(user);
             getSession().setAttribute(Const.LOGIN_SESSION_KEY, user);
         } catch (Exception e) {
@@ -226,7 +237,6 @@ public class UserController extends BaseController{
             User user = getUser();
             userRepository.setIntroduction(introduction, user.getEmail());
             user.setIntroduction(introduction);
-            getSession().setAttribute(Const.LOGIN_SESSION_KEY, user);
             return new ResponseData(ExceptionMsg.SUCCESS, introduction);
         } catch (Exception e) {
             // TODO: handle exception
@@ -257,7 +267,6 @@ public class UserController extends BaseController{
             }
             userRepository.setUserName(userName, loginUser.getEmail());
             loginUser.setUserName(userName);
-            getSession().setAttribute(Const.LOGIN_SESSION_KEY, loginUser);
             return new ResponseData(ExceptionMsg.SUCCESS, userName);
         } catch (Exception e) {
             // TODO: handle exception
@@ -289,7 +298,6 @@ public class UserController extends BaseController{
                 User user = getUser();
                 userRepository.setProfilePicture(savePath, user.getId());
                 user.setProfilePicture(savePath);
-                getSession().setAttribute(Const.LOGIN_SESSION_KEY, user);
             }
             logger.info("头像地址：" + savePath);
             logger.info("执行 上传头像 结束");
@@ -319,7 +327,7 @@ public class UserController extends BaseController{
         return new ResponseData(ExceptionMsg.SUCCESS);
     }
 
-    @RequestMapping(value = "/info", method = RequestMethod.POST)
+    @RequestMapping(value = "/info", method = RequestMethod.GET)
     @LoggerManage(description="查看用户个人信息")
     public ResponseData info() {
         try {
@@ -328,7 +336,16 @@ public class UserController extends BaseController{
             if (null == user) {
                 return new ResponseData(ExceptionMsg.FAILED);
             }
-            return new ResponseData(ExceptionMsg.SUCCESS, user);
+            User tempUser = new User();
+            tempUser.setId(user.getId());
+            tempUser.setUserName(user.getUserName());
+            tempUser.setEmail(user.getEmail());
+            tempUser.setProfilePicture(user.getProfilePicture());
+            tempUser.setUserPhone(user.getUserPhone());
+            tempUser.setIntroduction(user.getIntroduction());
+            tempUser.setCreateTime(user.getCreateTime());
+            tempUser.setLastModifyTime(user.getLastModifyTime());
+            return new ResponseData(ExceptionMsg.SUCCESS, tempUser);
         } catch (Exception e) {
             // TODO: handle exception
             logger.error("get info failed, ", e);
@@ -353,4 +370,93 @@ public class UserController extends BaseController{
         response.addCookie(cookie);
         return new ResponseData(ExceptionMsg.SUCCESS);
     }
+
+    @RequestMapping(value = "/loadFavorites", method = RequestMethod.GET)
+    @LoggerManage(description="查看载客热点收藏夹")
+    public ResponseData getLoadFv() {
+        try {
+            User user = getUser();
+            return new ResponseData(ExceptionMsg.SUCCESS, user.getLoadHotFavorites());
+        } catch (Exception e) {
+            // TODO: handle exception
+            logger.error("get info failed, ", e);
+            return new ResponseData(ExceptionMsg.FAILED);
+        }
+    }
+
+    @RequestMapping(value = "/psgFavorites", method = RequestMethod.GET)
+    @LoggerManage(description="查看候车热点收藏夹")
+    public ResponseData getPsgFv() {
+        try {
+            User user = getUser();
+            return new ResponseData(ExceptionMsg.SUCCESS, user.getPsgHotFavorites());
+        } catch (Exception e) {
+            // TODO: handle exception
+            logger.error("get info failed, ", e);
+            return new ResponseData(ExceptionMsg.FAILED);
+        }
+    }
+
+    @RequestMapping(value = "/pathFavorites", method = RequestMethod.GET)
+    @LoggerManage(description="查看路径收藏夹")
+    public ResponseData getPath() {
+        try {
+            User user = getUser();
+            return new ResponseData(ExceptionMsg.SUCCESS, user.getPathFavorites());
+        } catch (Exception e) {
+            // TODO: handle exception
+            logger.error("get info failed, ", e);
+            return new ResponseData(ExceptionMsg.FAILED);
+        }
+    }
+
+    @RequestMapping(value = "/desFavorites", method = RequestMethod.GET)
+    @LoggerManage(description="查看目的地热点收藏夹")
+    public ResponseData getDesFv() {
+        try {
+            User user = getUser();
+            return new ResponseData(ExceptionMsg.SUCCESS, user.getDestinationFavorites());
+        } catch (Exception e) {
+            // TODO: handle exception
+            logger.error("get info failed, ", e);
+            return new ResponseData(ExceptionMsg.FAILED);
+        }
+    }
+
+    @RequestMapping(value = "/pathHistory", method = RequestMethod.GET)
+    @LoggerManage(description="查看目的地历史记录")
+    public ResponseData getPathHistory() {
+        try {
+            User user = getUser();
+            return new ResponseData(ExceptionMsg.SUCCESS, user.getPaths());
+        } catch (Exception e) {
+            // TODO: handle exception
+            logger.error("get info failed, ", e);
+            return new ResponseData(ExceptionMsg.FAILED);
+        }
+    }
+
+    @RequestMapping(value = "/path", method = RequestMethod.DELETE)
+    @LoggerManage(description="删除路径历史根据id")
+    public ResponseData deletePathFromFavorites(Long id) {
+        try {
+            User user = getUser();
+            Path path = pathRepository.findById(id);
+            if (path==null){
+                new ResponseData(ExceptionMsg.PsgHotIdError);
+            }
+
+            if(user.deletePath(path)==false){
+                return new ResponseData(ExceptionMsg.FAILED, "删除失败");
+            }
+            userRepository.save(user);
+            return new ResponseData(ExceptionMsg.SUCCESS, user.getDestinationFavorites());
+        } catch (Exception e) {
+            // TODO: handle exception
+            logger.error("updateIntroduction failed, ", e);
+            return new ResponseData(ExceptionMsg.FAILED);
+        }
+    }
+
+
 }

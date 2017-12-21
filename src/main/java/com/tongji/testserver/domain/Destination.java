@@ -9,6 +9,7 @@ import java.sql.Time;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @program: testserver
@@ -32,7 +33,7 @@ public class Destination extends Entitys implements Serializable {
     @Column(nullable = false)
     private int dayOfWeek;
     @Column(nullable = false)
-    private Time arriveTime;
+    private Long arriveTime;
     @Column(nullable = false)
     private Long createTime;
     @Column(nullable = true)
@@ -44,13 +45,29 @@ public class Destination extends Entitys implements Serializable {
     @ManyToMany
     private List<Tag> tags;
     @ManyToOne
+    @JsonBackReference
     private Path path;
     @ManyToOne
     @JsonBackReference
     private User user;
     @ManyToOne
+    @JsonBackReference
     private DestinationFavorites destinationFavorites;
 
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Destination that = (Destination) o;
+        return id == that.id;
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(id);
+    }
 
     public static long getSerialVersionUID() {
         return serialVersionUID;
@@ -96,11 +113,11 @@ public class Destination extends Entitys implements Serializable {
         this.dayOfWeek = dayOfWeek;
     }
 
-    public Time getArriveTime() {
+    public Long getArriveTime() {
         return arriveTime;
     }
 
-    public void setArriveTime(Time arriveTime) {
+    public void setArriveTime(Long arriveTime) {
         this.arriveTime = arriveTime;
     }
 

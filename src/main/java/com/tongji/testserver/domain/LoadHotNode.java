@@ -1,10 +1,12 @@
 package com.tongji.testserver.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import springfox.documentation.spring.web.json.Json;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @program: testserver
@@ -30,7 +32,22 @@ public class LoadHotNode extends Entitys implements Serializable {
     @Column(nullable = true)
     private String title;
     @ManyToOne
+    @JsonBackReference
     private LoadHotFavorites loadHotFavorites;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        LoadHotNode that = (LoadHotNode) o;
+        return id == that.id;
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(id);
+    }
 
     public static long getSerialVersionUID() {
         return serialVersionUID;

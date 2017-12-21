@@ -1,9 +1,12 @@
 package com.tongji.testserver.domain;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.tongji.testserver.service.HotNodeService;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -45,23 +48,28 @@ public class User extends Entitys implements Serializable {
 	@Column(nullable = true)
 	private String validataCode;
 
-	@OneToMany(mappedBy = "user", fetch=FetchType.EAGER)
+	@OneToOne(mappedBy = "user", fetch=FetchType.EAGER, cascade=CascadeType.ALL)
+	private PathFavorites pathFavorites = new PathFavorites();
+	@OneToOne(mappedBy = "user", fetch=FetchType.EAGER, cascade=CascadeType.ALL)
+	private LoadHotFavorites loadHotFavorites = new LoadHotFavorites();
+	@OneToOne(mappedBy = "user", fetch=FetchType.EAGER, cascade=CascadeType.ALL)
+	private PsgHotFavorites psgHotFavorites = new PsgHotFavorites();
+	@OneToOne(mappedBy = "user", fetch=FetchType.EAGER, cascade=CascadeType.ALL)
+	private DestinationFavorites destinationFavorites = new DestinationFavorites();
+	@ManyToMany
+	private Set<Role> roles = new HashSet();
+	@OneToMany(mappedBy = "user", fetch=FetchType.EAGER, cascade=CascadeType.ALL)
 	@JsonManagedReference
-	private Set<Favorites> favorites;
-	@ManyToMany(fetch=FetchType.EAGER)
-	private Set<Role> roles;
-	@OneToMany(mappedBy = "user", fetch=FetchType.EAGER)
+	private Set<Path> paths = new HashSet();
+	@OneToMany(mappedBy = "user", fetch=FetchType.EAGER, cascade=CascadeType.ALL)
 	@JsonManagedReference
-	private Set<Path> paths;
-	@OneToMany(mappedBy = "user", fetch=FetchType.EAGER)
+	private Set<Destination> destinations = new HashSet();;
+	@OneToMany(mappedBy = "user", fetch=FetchType.EAGER, cascade=CascadeType.ALL)
 	@JsonManagedReference
-	private Set<Destination> destinations;
-	@OneToMany(mappedBy = "user", fetch=FetchType.EAGER)
+	private Set<Feedback> feedbacks = new HashSet();;
+	@OneToMany(mappedBy = "user", fetch=FetchType.EAGER, cascade=CascadeType.ALL)
 	@JsonManagedReference
-	private Set<Feedback> feedbacks;
-	@OneToMany(mappedBy = "user", fetch=FetchType.EAGER)
-	@JsonManagedReference
-	private Set<Notice> notices;
+	private Set<Notice> notices = new HashSet();;
 
 
 
@@ -75,6 +83,18 @@ public class User extends Entitys implements Serializable {
 		this.userName = userName;
 	}
 
+
+	public void addPath(Path path){
+		path.setUser(this);
+		paths.add(path);
+	}
+
+	public boolean deletePath(Path path){
+		path.setPathFavorites(null);
+		return paths.remove(path);
+//        return this.psgHotNodes.remove(psgHotNode);
+
+	}
 
 	public static long getSerialVersionUID() {
 		return serialVersionUID;
@@ -184,13 +204,6 @@ public class User extends Entitys implements Serializable {
 		this.validataCode = validataCode;
 	}
 
-	public Set<Favorites> getFavorites() {
-		return favorites;
-	}
-
-	public void setFavorites(Set<Favorites> favorites) {
-		this.favorites = favorites;
-	}
 
 	public Set<Role> getRoles() {
 		return roles;
@@ -230,5 +243,37 @@ public class User extends Entitys implements Serializable {
 
 	public void setNotices(Set<Notice> notices) {
 		this.notices = notices;
+	}
+
+	public PathFavorites getPathFavorites() {
+		return pathFavorites;
+	}
+
+	public void setPathFavorites(PathFavorites pathFavorites) {
+		this.pathFavorites = pathFavorites;
+	}
+
+	public LoadHotFavorites getLoadHotFavorites() {
+		return loadHotFavorites;
+	}
+
+	public void setLoadHotFavorites(LoadHotFavorites loadHotFavorites) {
+		this.loadHotFavorites = loadHotFavorites;
+	}
+
+	public PsgHotFavorites getPsgHotFavorites() {
+		return psgHotFavorites;
+	}
+
+	public void setPsgHotFavorites(PsgHotFavorites psgHotFavorites) {
+		this.psgHotFavorites = psgHotFavorites;
+	}
+
+	public DestinationFavorites getDestinationFavorites() {
+		return destinationFavorites;
+	}
+
+	public void setDestinationFavorites(DestinationFavorites destinationFavorites) {
+		this.destinationFavorites = destinationFavorites;
 	}
 }
